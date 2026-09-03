@@ -227,16 +227,19 @@ h2 {
     border-color: rgba(255,255,255,0.2);
 }
 
-.work-img {
+.work-video {
+    width: 100%;
     height: 200px;
+    object-fit: cover;
     border-radius: 15px;
     margin-bottom: 1.5rem;
     filter: grayscale(100%);
-    transition: filter 0.3s;
+    transition: filter 0.3s, transform 0.3s;
 }
 
-.work-card:hover .work-img {
-    filter: grayscale(80%);
+.work-card:hover .work-video {
+    filter: grayscale(0%);
+    transform: scale(1.02);
 }
 
 .work-card h3 {
