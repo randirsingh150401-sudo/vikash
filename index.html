@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Minimalist Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="logo">Portfolio</div>
+        <ul class="nav-links">
+            <li><a href="#work">My Work</a></li>
+            <li><a href="#contact">Contact</a></li>
+            <li><a href="#" class="btn-primary book-call-btn">Book a Call</a></li>
+        </ul>
+    </nav>
+
+    <header class="hero">
+        <div class="hero-content">
+            <h1>Minimalist Design for a Modern World</h1>
+            <p>Hi there! Let's build something amazing together and bring your ideas to life.</p>
+            <div class="hero-buttons">
+                <a href="#work" class="btn-secondary">See My Work</a>
+                <a href="#" class="btn-primary book-call-btn">Book a Call</a>
+            </div>
+        </div>
+        <div class="hero-shapes">
+            <!-- decorative blurred shapes -->
+            <div class="shape shape-1"></div>
+            <div class="shape shape-2"></div>
+            <div class="shape shape-3"></div>
+        </div>
+    </header>
+
+    <section id="work" class="work-section">
+        <h2>My Work</h2>
+        <div class="work-grid">
+            <div class="work-card">
+                <div class="work-img" style="background: linear-gradient(135deg, #111 0%, #333 100%);"></div>
+                <h3>Project Alpha</h3>
+                <p>A sleek web application for creatives.</p>
+            </div>
+            <div class="work-card">
+                <div class="work-img" style="background: linear-gradient(120deg, #222 0%, #444 100%);"></div>
+                <h3>Project Beta</h3>
+                <p>An interactive dashboard with smooth animations.</p>
+            </div>
+            <div class="work-card">
+                <div class="work-img" style="background: linear-gradient(to right, #000 0%, #2a2a2a 100%);"></div>
+                <h3>Project Gamma</h3>
+                <p>E-commerce platform with a modern twist.</p>
+            </div>
+        </div>
+    </section>
+
+    <section id="contact" class="contact-section">
+        <div class="contact-container">
+            <h2>Let's Talk</h2>
+            <p>Want to book a call or start a project? Fill out the form below!</p>
+            <form id="contactForm">
+                <div class="input-group">
+                    <input type="text" id="name" required placeholder="Your Name">
+                </div>
+                <div class="input-group">
+                    <input type="email" id="email" required placeholder="Your Email">
+                </div>
+                <div class="input-group">
+                    <textarea id="message" rows="5" required placeholder="What would you like to discuss?"></textarea>
+                </div>
+                <button type="submit" class="btn-primary form-submit">Send Message</button>
+            </form>
+            <div id="formStatus" class="form-status"></div>
+        </div>
+    </section>
+
+    <footer>
+        <p>&copy; 2026. All rights reserved.</p>
+    </footer>
+
+    <!-- Call Modal -->
+    <div id="callModal" class="modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <h3 id="modalTitle">Call Me</h3>
+            <p id="modalMessage"></p>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
