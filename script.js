@@ -1,4 +1,23 @@
 document.addEventListener('DOMContentLoaded', () => {
+    // Live clock in navbar
+    function updateClock() {
+        const clock = document.getElementById('navClock');
+        if (!clock) return;
+        const now = new Date();
+        const h = String(now.getHours()).padStart(2, '0');
+        const m = String(now.getMinutes()).padStart(2, '0');
+        const s = String(now.getSeconds()).padStart(2, '0');
+        const offset = -now.getTimezoneOffset();
+        const sign = offset >= 0 ? '+' : '-';
+        const absOffset = Math.abs(offset);
+        const oh = String(Math.floor(absOffset / 60)).padStart(2, '0');
+        const om = String(absOffset % 60).padStart(2, '0');
+        clock.textContent = `${h}:${m}:${s} GMT${sign}${oh}:${om}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+
     // Contact Form Logic
     const contactForm = document.getElementById('contactForm');
     const formStatus = document.getElementById('formStatus');
