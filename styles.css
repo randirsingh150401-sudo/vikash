@@ -212,23 +212,6 @@ h2 {
     font-size: 1rem;
 }
 
-/* Decorative arrow — absolute, upper-left, pointing toward center text */
-.hero-arrow-deco {
-    position: absolute;
-    left: 6%;
-    top: 50%;
-    transform: translateY(-60%);
-    width: 220px;
-    z-index: 2;
-    opacity: 0.9;
-    pointer-events: none;
-}
-
-.hero-arrow-deco svg {
-    width: 100%;
-    height: auto;
-}
-
 /* Shapes */
 .hero-shapes {
     position: absolute;
