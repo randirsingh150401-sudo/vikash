@@ -18,8 +18,7 @@
         </div>
         <ul class="nav-links">
             <li><a href="#work">My Work</a></li>
-            <li><a href="#contact">Contact</a></li>
-            <li><a href="#" class="btn-primary book-call-btn">Book a Call</a></li>
+            <li><a href="#contact">Book a Call</a></li>
         </ul>
         <div class="nav-clock" id="navClock"></div>
     </nav>
@@ -33,7 +32,7 @@
             <h1>iam in visuals</h1>
             <p>Hi there! Let's build something amazing together and bring your ideas to life.</p>
             <div class="hero-buttons">
-                <a href="#" class="btn-primary book-call-btn">
+                <a href="#contact" class="btn-primary">
                     <span class="btn-avatar">👤</span>
                     Book a call with me
                 </a>
@@ -71,23 +70,54 @@
 
     <section id="contact" class="contact-section">
         <div class="contact-container">
-            <h2>Let's Talk</h2>
-            <p>Want to book a call or start a project? Fill out the form below!</p>
-            <form id="contactForm">
-                <div class="input-group">
-                    <input type="text" id="name" required placeholder="Your Name">
-                </div>
-                <div class="input-group">
-                    <input type="email" id="email" required placeholder="Your Email">
-                </div>
-                <div class="input-group">
-                    <textarea id="message" rows="5" required placeholder="What would you like to discuss?"></textarea>
-                </div>
-                <button type="submit" class="btn-primary form-submit">Send Message</button>
-            </form>
-            <div id="formStatus" class="form-status"></div>
+            <h2>Book a Call</h2>
+            <p>Pick a time that works for you — let's talk about your project.</p>
+            <div id="cal-embed"></div>
         </div>
     </section>
+
+    <!-- Cal.com embed script -->
+    <script type="text/javascript">
+      (function (C, A, L) {
+        let p = function (a, ar) { a.q.push(ar); };
+        let d = C.document;
+        C.Cal = C.Cal || function () {
+          let cal = C.Cal;
+          let ar = arguments;
+          if (!cal.loaded) {
+            cal.ns = {};
+            cal.q = cal.q || [];
+            d.head.appendChild(d.createElement("script")).src = A;
+            cal.loaded = true;
+          }
+          if (ar[0] === L) {
+            const api = function () { p(api, arguments); };
+            const namespace = ar[1];
+            api.q = api.q || [];
+            if (typeof namespace === "string") {
+              cal.ns[namespace] = cal.ns[namespace] || api;
+              p(cal.ns[namespace], ar);
+              p(cal, [L, namespace, api]);
+            } else p(cal, ar);
+            return;
+          }
+          p(cal, ar);
+        };
+      })(window, "https://app.cal.com/embed/embed.js", "init");
+
+      Cal("init", { origin: "https://cal.com" });
+      Cal("inline", {
+        elementOrSelector: "#cal-embed",
+        calLink: "avikash-choudhary-oobakh/intro-launch-call",
+        layout: "month_view"
+      });
+      Cal("ui", {
+        theme: "dark",
+        styles: { branding: { brandColor: "#ffffff" } },
+        hideEventTypeDetails: false,
+        layout: "month_view"
+      });
+    </script>
 
     <footer>
         <p>&copy; 2026. All rights reserved.</p>
