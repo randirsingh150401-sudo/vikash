@@ -18,6 +18,97 @@ document.addEventListener('DOMContentLoaded', () => {
     setInterval(updateClock, 1000);
 
 
+    // ── Video Lightbox ──
+    const lightbox      = document.getElementById('videoLightbox');
+    const lbVideo       = document.getElementById('lightboxVideo');
+    const lbClose       = document.getElementById('lightboxClose');
+    const lbPlayBtn     = document.getElementById('lightboxPlayBtn');
+    const iconPause     = document.getElementById('iconPause');
+    const iconPlay      = document.getElementById('iconPlay');
+    const lbFill        = document.getElementById('lightboxFill');
+    const lbTime        = document.getElementById('lightboxTime');
+    const lbBar         = document.querySelector('.lightbox-bar');
+
+    function formatTime(sec) {
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    function syncIcons() {
+        if (lbVideo.paused) {
+            iconPause.style.display = 'none';
+            iconPlay.style.display  = 'block';
+        } else {
+            iconPause.style.display = 'block';
+            iconPlay.style.display  = 'none';
+        }
+    }
+
+    function openLightbox(src) {
+        lbVideo.src = src;
+        lbVideo.currentTime = 0;
+        lightbox.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        lbVideo.play();
+        syncIcons();
+    }
+
+    function closeLightbox() {
+        lbVideo.pause();
+        lbVideo.src = '';
+        lightbox.classList.remove('active');
+        document.body.style.overflow = '';
+    }
+
+    // Open lightbox on card click
+    document.querySelectorAll('.work-card').forEach(card => {
+        card.addEventListener('click', () => {
+            const src = card.querySelector('video').src;
+            openLightbox(src);
+        });
+    });
+
+    // Close button
+    lbClose.addEventListener('click', closeLightbox);
+
+    // Close on backdrop click
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) closeLightbox();
+    });
+
+    // Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') closeLightbox();
+        if (e.key === ' ' && lightbox.classList.contains('active')) {
+            e.preventDefault();
+            lbVideo.paused ? lbVideo.play() : lbVideo.pause();
+        }
+    });
+
+    // Play / Pause toggle
+    lbPlayBtn.addEventListener('click', () => {
+        lbVideo.paused ? lbVideo.play() : lbVideo.pause();
+    });
+
+    lbVideo.addEventListener('play',  syncIcons);
+    lbVideo.addEventListener('pause', syncIcons);
+
+    // Progress bar update
+    lbVideo.addEventListener('timeupdate', () => {
+        if (!lbVideo.duration) return;
+        const pct = (lbVideo.currentTime / lbVideo.duration) * 100;
+        lbFill.style.width = pct + '%';
+        lbTime.textContent = formatTime(lbVideo.currentTime);
+    });
+
+    // Seek on bar click
+    lbBar.addEventListener('click', (e) => {
+        const rect = lbBar.getBoundingClientRect();
+        const pct  = (e.clientX - rect.left) / rect.width;
+        lbVideo.currentTime = pct * lbVideo.duration;
+    });
+
     // Contact Form Logic
     const contactForm = document.getElementById('contactForm');
     const formStatus = document.getElementById('formStatus');
