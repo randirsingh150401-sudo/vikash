@@ -142,20 +142,48 @@
         <div class="lightbox-inner">
             <video id="lightboxVideo" playsinline></video>
             <div class="lightbox-controls">
-                <button class="lightbox-play-btn" id="lightboxPlayBtn" aria-label="Play / Pause">
-                    <svg id="iconPause" width="28" height="28" viewBox="0 0 24 24" fill="white">
-                        <rect x="6" y="4" width="4" height="16" rx="1"/>
-                        <rect x="14" y="4" width="4" height="16" rx="1"/>
-                    </svg>
-                    <svg id="iconPlay" width="28" height="28" viewBox="0 0 24 24" fill="white" style="display:none">
-                        <path d="M5 3l14 9-14 9V3z"/>
-                    </svg>
-                </button>
-                <div class="lightbox-progress">
-                    <div class="lightbox-bar">
-                        <div class="lightbox-fill" id="lightboxFill"></div>
-                    </div>
-                    <span class="lightbox-time" id="lightboxTime">0:00</span>
+                <!-- Left: play + skip + time -->
+                <div class="lb-left">
+                    <button class="lb-icon-btn" id="lbRewind" aria-label="Rewind 5s" title="Rewind 5s">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 5V2L7 7l5 5V8c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z" fill="white"/>
+                            <text x="8.5" y="15" font-size="5.5" fill="white" font-family="Inter,sans-serif" font-weight="700">5</text>
+                        </svg>
+                    </button>
+                    <button class="lightbox-play-btn" id="lightboxPlayBtn" aria-label="Play / Pause">
+                        <svg id="iconPause" width="22" height="22" viewBox="0 0 24 24" fill="white">
+                            <rect x="6" y="4" width="4" height="16" rx="1"/>
+                            <rect x="14" y="4" width="4" height="16" rx="1"/>
+                        </svg>
+                        <svg id="iconPlay" width="22" height="22" viewBox="0 0 24 24" fill="white" style="display:none">
+                            <path d="M5 3l14 9-14 9V3z"/>
+                        </svg>
+                    </button>
+                    <button class="lb-icon-btn" id="lbForward" aria-label="Forward 5s" title="Forward 5s">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                            <path d="M12 5V2l5 5-5 5V8c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6h2c0 4.42-3.58 8-8 8s-8-3.58-8-8 3.58-8 8-8z" fill="white"/>
+                            <text x="8.5" y="15" font-size="5.5" fill="white" font-family="Inter,sans-serif" font-weight="700">5</text>
+                        </svg>
+                    </button>
+                    <span class="lightbox-time" id="lightboxTime">0:00 / 0:00</span>
+                </div>
+
+                <!-- Middle: seekbar -->
+                <div class="lightbox-bar" id="lightboxBar">
+                    <div class="lightbox-fill" id="lightboxFill"></div>
+                    <div class="lightbox-thumb" id="lightboxThumb"></div>
+                </div>
+
+                <!-- Right: fullscreen -->
+                <div class="lb-right">
+                    <button class="lb-icon-btn" id="lbFullscreen" aria-label="Fullscreen" title="Fullscreen">
+                        <svg id="iconExpand" width="20" height="20" viewBox="0 0 24 24" fill="white">
+                            <path d="M7 14H5v5h5v-2H7v-3zm-2-4h2V7h3V5H5v5zm12 7h-3v2h5v-5h-2v3zM14 5v2h3v3h2V5h-5z"/>
+                        </svg>
+                        <svg id="iconCompress" width="20" height="20" viewBox="0 0 24 24" fill="white" style="display:none">
+                            <path d="M5 16h3v3h2v-5H5v2zm3-8H5v2h5V5H8v3zm6 11h2v-3h3v-2h-5v5zm2-11V5h-2v5h5V8h-3z"/>
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>

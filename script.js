@@ -26,23 +26,41 @@ document.addEventListener('DOMContentLoaded', () => {
     const iconPause     = document.getElementById('iconPause');
     const iconPlay      = document.getElementById('iconPlay');
     const lbFill        = document.getElementById('lightboxFill');
+    const lbThumb       = document.getElementById('lightboxThumb');
     const lbTime        = document.getElementById('lightboxTime');
-    const lbBar         = document.querySelector('.lightbox-bar');
+    const lbBar         = document.getElementById('lightboxBar');
+    const lbRewind      = document.getElementById('lbRewind');
+    const lbForward     = document.getElementById('lbForward');
+    const lbFullscreen  = document.getElementById('lbFullscreen');
+    const iconExpand    = document.getElementById('iconExpand');
+    const iconCompress  = document.getElementById('iconCompress');
+    const lbInner       = document.querySelector('.lightbox-inner');
 
     function formatTime(sec) {
+        if (isNaN(sec)) return '0:00';
         const m = Math.floor(sec / 60);
         const s = Math.floor(sec % 60).toString().padStart(2, '0');
         return `${m}:${s}`;
     }
 
     function syncIcons() {
-        if (lbVideo.paused) {
-            iconPause.style.display = 'none';
-            iconPlay.style.display  = 'block';
-        } else {
-            iconPause.style.display = 'block';
-            iconPlay.style.display  = 'none';
-        }
+        const paused = lbVideo.paused;
+        iconPause.style.display = paused ? 'none'  : 'block';
+        iconPlay.style.display  = paused ? 'block' : 'none';
+    }
+
+    function showFlash(text) {
+        const el = document.createElement('div');
+        el.className = 'lb-skip-flash';
+        el.textContent = text;
+        lbInner.style.position = 'relative';
+        lbInner.appendChild(el);
+        setTimeout(() => el.remove(), 750);
+    }
+
+    function skip(seconds) {
+        lbVideo.currentTime = Math.max(0, Math.min(lbVideo.duration || 0, lbVideo.currentTime + seconds));
+        showFlash(seconds > 0 ? `+${seconds}s` : `${seconds}s`);
     }
 
     function openLightbox(src) {
@@ -59,54 +77,68 @@ document.addEventListener('DOMContentLoaded', () => {
         lbVideo.src = '';
         lightbox.classList.remove('active');
         document.body.style.overflow = '';
+        // exit fullscreen if active
+        if (document.fullscreenElement) document.exitFullscreen();
     }
 
     // Open lightbox on card click
     document.querySelectorAll('.work-card').forEach(card => {
         card.addEventListener('click', () => {
-            const src = card.querySelector('video').src;
-            openLightbox(src);
+            openLightbox(card.querySelector('video').src);
         });
     });
 
-    // Close button
     lbClose.addEventListener('click', closeLightbox);
+    lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
 
-    // Close on backdrop click
-    lightbox.addEventListener('click', (e) => {
-        if (e.target === lightbox) closeLightbox();
-    });
-
-    // Escape key
+    // Keyboard shortcuts
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape') closeLightbox();
-        if (e.key === ' ' && lightbox.classList.contains('active')) {
-            e.preventDefault();
-            lbVideo.paused ? lbVideo.play() : lbVideo.pause();
-        }
+        if (!lightbox.classList.contains('active')) return;
+        if (e.key === 'Escape')       { closeLightbox(); }
+        if (e.key === ' ')            { e.preventDefault(); lbVideo.paused ? lbVideo.play() : lbVideo.pause(); }
+        if (e.key === 'ArrowRight')   { skip(5); }
+        if (e.key === 'ArrowLeft')    { skip(-5); }
+        if (e.key === 'f' || e.key === 'F') { toggleFullscreen(); }
     });
 
-    // Play / Pause toggle
-    lbPlayBtn.addEventListener('click', () => {
-        lbVideo.paused ? lbVideo.play() : lbVideo.pause();
-    });
-
+    // Play / Pause
+    lbPlayBtn.addEventListener('click', () => { lbVideo.paused ? lbVideo.play() : lbVideo.pause(); });
     lbVideo.addEventListener('play',  syncIcons);
     lbVideo.addEventListener('pause', syncIcons);
+
+    // Skip buttons
+    lbRewind.addEventListener('click',  () => skip(-5));
+    lbForward.addEventListener('click', () => skip(5));
+
+    // Fullscreen
+    function toggleFullscreen() {
+        if (!document.fullscreenElement) {
+            lbInner.requestFullscreen();
+        } else {
+            document.exitFullscreen();
+        }
+    }
+    lbFullscreen.addEventListener('click', toggleFullscreen);
+    document.addEventListener('fullscreenchange', () => {
+        const isFull = !!document.fullscreenElement;
+        iconExpand.style.display   = isFull ? 'none'  : 'block';
+        iconCompress.style.display = isFull ? 'block' : 'none';
+    });
 
     // Progress bar update
     lbVideo.addEventListener('timeupdate', () => {
         if (!lbVideo.duration) return;
         const pct = (lbVideo.currentTime / lbVideo.duration) * 100;
         lbFill.style.width = pct + '%';
-        lbTime.textContent = formatTime(lbVideo.currentTime);
+        lbBar.style.setProperty('--pct', pct + '%');
+        lbThumb.style.left = pct + '%';
+        lbTime.textContent = `${formatTime(lbVideo.currentTime)} / ${formatTime(lbVideo.duration)}`;
     });
 
     // Seek on bar click
     lbBar.addEventListener('click', (e) => {
         const rect = lbBar.getBoundingClientRect();
-        const pct  = (e.clientX - rect.left) / rect.width;
-        lbVideo.currentTime = pct * lbVideo.duration;
+        lbVideo.currentTime = ((e.clientX - rect.left) / rect.width) * lbVideo.duration;
     });
 
     // Contact Form Logic
