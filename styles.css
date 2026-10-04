@@ -52,21 +52,23 @@ h2 {
     align-items: center;
     gap: 0.5rem;
     padding: 0.75rem 1.75rem;
-    background: var(--blue-mid);
-    color: var(--white);
+    background: var(--white);
+    color: var(--near-black);
     text-decoration: none;
     border-radius: 50px;
     font-weight: 600;
     font-size: 0.95rem;
     letter-spacing: -0.02em;
-    transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-    border: none;
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s ease, background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    border: 1.5px solid var(--white);
     cursor: pointer;
 }
 
 .btn-primary:hover {
-    transform: translateY(-3px);
-    background: #1a7fd4;
+    transform: translate(var(--mx, 0px), calc(var(--my, 0px) - 3px));
+    background: var(--blue-mid);
+    border-color: var(--blue-mid);
+    color: var(--white);
     box-shadow: 0 12px 32px rgba(33, 150, 243, 0.4);
 }
 
@@ -81,16 +83,16 @@ h2 {
     font-weight: 600;
     font-size: 0.95rem;
     letter-spacing: -0.02em;
-    transition: transform 0.3s ease, background 0.3s ease, box-shadow 0.3s ease;
-    border: 1.5px solid rgba(144, 196, 237, 0.45);
+    transition: transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    border: 1.5px solid rgba(255, 255, 255, 0.35);
     cursor: pointer;
 }
 
 .btn-secondary:hover {
-    transform: translateY(-3px);
-    background: rgba(33, 150, 243, 0.1);
-    border-color: var(--blue-light);
-    box-shadow: 0 12px 32px rgba(33, 150, 243, 0.15);
+    transform: translate(var(--mx, 0px), calc(var(--my, 0px) - 3px));
+    background: var(--blue-mid);
+    border-color: var(--blue-mid);
+    box-shadow: 0 12px 32px rgba(33, 150, 243, 0.4);
 }
 
 /* ── Navbar ── */
@@ -165,6 +167,7 @@ h2 {
 
 .hero-content {
     z-index: 2;
+    will-change: transform;
     padding-top: 5rem;
     max-width: 720px;
     display: flex;
@@ -257,7 +260,7 @@ h2 {
     background: var(--blue-mid);
     bottom: -180px; right: 20%;
     animation-delay: -6s;
-    opacity: 0.08;
+    opacity: 0.2;
 }
 
 .shape-3 {
@@ -265,7 +268,7 @@ h2 {
     background: var(--blue-light);
     top: 35%; left: -80px;
     animation-delay: -3s;
-    opacity: 0.07;
+    opacity: 0.18;
 }
 
 @keyframes float {
@@ -292,11 +295,26 @@ h2 {
     border-radius: 18px;
     padding: 1.4rem;
     border: 1px solid rgba(33, 150, 243, 0.1);
-    transition: transform 0.3s, border-color 0.3s, box-shadow 0.3s;
+    position: relative;
+    transform-style: preserve-3d;
+    transition: transform 0.2s ease-out, border-color 0.3s, box-shadow 0.3s;
 }
 
+/* spotlight that follows the mouse inside a card */
+.work-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s;
+    background: radial-gradient(360px circle at var(--gx, 50%) var(--gy, 50%), rgba(33, 150, 243, 0.16), transparent 65%);
+}
+.work-card:hover::before { opacity: 1; }
+
 .work-card:hover {
-    transform: translateY(-8px);
+    transform: perspective(900px) translateY(-8px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
     border-color: rgba(33, 150, 243, 0.4);
     box-shadow: 0 20px 60px rgba(33, 150, 243, 0.12);
 }
@@ -603,4 +621,86 @@ footer {
     color: var(--text-main);
     font-size: 1.05rem;
     line-height: 1.6;
+}
+
+/* ── Mouse motion ── */
+.hero-spotlight {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(520px circle at var(--sx, 50%) var(--sy, 50%), rgba(33, 150, 243, 0.32), transparent 65%);
+}
+
+.cursor-dot,
+.cursor-ring { display: none; }
+
+@media (hover: hover) and (pointer: fine) {
+    html.has-custom-cursor,
+    html.has-custom-cursor * { cursor: none !important; }
+    html.has-custom-cursor #cal-embed,
+    html.has-custom-cursor #cal-embed * { cursor: auto !important; }
+
+    .cursor-dot,
+    .cursor-ring {
+        display: flex;
+        position: fixed;
+        top: 0; left: 0;
+        pointer-events: none;
+        z-index: 9999;
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.25s;
+        will-change: transform;
+    }
+    html.has-custom-cursor.cursor-visible .cursor-dot,
+    html.has-custom-cursor.cursor-visible .cursor-ring { opacity: 1; }
+
+    .cursor-dot {
+        width: 8px; height: 8px;
+        margin: -4px 0 0 -4px;
+        background: var(--blue-light);
+        box-shadow: 0 0 12px rgba(33, 150, 243, 0.9);
+    }
+
+    .cursor-ring {
+        width: 38px; height: 38px;
+        margin: -19px 0 0 -19px;
+        border: 1.5px solid rgba(144, 196, 237, 0.55);
+        align-items: center;
+        justify-content: center;
+        transition: opacity 0.25s, width 0.3s cubic-bezier(0.22, 1, 0.36, 1), height 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+                    margin 0.3s cubic-bezier(0.22, 1, 0.36, 1), background 0.3s, border-color 0.3s;
+    }
+
+    .cursor-label {
+        font-size: 0.72rem;
+        font-weight: 600;
+        color: #fff;
+        letter-spacing: 0;
+        opacity: 0;
+        transform: scale(0.6);
+        transition: opacity 0.2s, transform 0.3s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+
+    /* hovering links / buttons */
+    .cursor-ring.is-link {
+        width: 58px; height: 58px;
+        margin: -29px 0 0 -29px;
+        background: rgba(33, 150, 243, 0.14);
+        border-color: var(--blue-mid);
+    }
+
+    /* hovering a video card */
+    .cursor-ring.is-media {
+        width: 84px; height: 84px;
+        margin: -42px 0 0 -42px;
+        background: rgba(33, 150, 243, 0.55);
+        border-color: transparent;
+        backdrop-filter: blur(4px);
+    }
+    .cursor-ring.is-media .cursor-label { opacity: 1; transform: scale(1); }
+
+    /* pressed */
+    .cursor-ring.is-down { border-color: #fff; }
 }

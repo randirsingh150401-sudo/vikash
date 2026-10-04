@@ -17,6 +17,111 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClock();
     setInterval(updateClock, 1000);
 
+    // ── Mouse motion ──
+    const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
+    const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (canHover && !reduceMotion) {
+        const root     = document.documentElement;
+        const dot      = document.getElementById('cursorDot');
+        const ring     = document.getElementById('cursorRing');
+        const label    = ring.querySelector('.cursor-label');
+        const hero     = document.querySelector('.hero');
+        const shapes   = document.querySelectorAll('.shape');
+        const heroContent = document.querySelector('.hero-content');
+        const lerp     = (a, b, t) => a + (b - a) * t;
+
+        // Smoothed pointer state
+        let mx = innerWidth / 2, my = innerHeight / 2;   // raw mouse
+        let rx = mx, ry = my;                            // ring (lags)
+        let px = 0, py = 0;                              // parallax (-1..1, smoothed)
+        let tx = 0, ty = 0;                              // parallax target
+
+        root.classList.add('has-custom-cursor');
+
+        window.addEventListener('mousemove', (e) => {
+            mx = e.clientX; my = e.clientY;
+            tx = (mx / innerWidth  - 0.5) * 2;
+            ty = (my / innerHeight - 0.5) * 2;
+            root.classList.add('cursor-visible');
+            dot.style.transform = `translate(${mx}px, ${my}px)`;
+        });
+        document.addEventListener('mouseleave', () => root.classList.remove('cursor-visible'));
+        document.addEventListener('mouseenter', () => root.classList.add('cursor-visible'));
+        window.addEventListener('mousedown', () => ring.classList.add('is-down'));
+        window.addEventListener('mouseup',   () => ring.classList.remove('is-down'));
+
+        // Hide custom cursor over the Cal.com iframe (it has its own cursor)
+        const cal = document.getElementById('cal-embed');
+        if (cal) {
+            cal.addEventListener('mouseenter', () => root.classList.remove('cursor-visible'));
+            cal.addEventListener('mouseleave', () => root.classList.add('cursor-visible'));
+        }
+
+        // Ring state: link / media
+        const linkSel = 'a, button, .close-modal';
+        document.addEventListener('mouseover', (e) => {
+            const onCard = e.target.closest('.work-card');
+            const onLink = e.target.closest(linkSel);
+            ring.classList.toggle('is-media', !!onCard && !onLink);
+            ring.classList.toggle('is-link',  !!onLink);
+        });
+
+        // Smooth animation loop
+        (function frame() {
+            rx = lerp(rx, mx, 0.16);
+            ry = lerp(ry, my, 0.16);
+            ring.style.transform = `translate(${rx}px, ${ry}px)`;
+
+            px = lerp(px, tx, 0.06);
+            py = lerp(py, ty, 0.06);
+            shapes.forEach((s, i) => {
+                const depth = (i + 1) * 55;
+                s.style.translate = `${-px * depth}px ${-py * depth}px`;
+            });
+            // hero text floats slightly with the mouse
+            heroContent.style.transform = `translate(${px * 14}px, ${py * 10}px)`;
+            requestAnimationFrame(frame);
+        })();
+
+        // Hero spotlight
+        hero.addEventListener('mousemove', (e) => {
+            const r = hero.getBoundingClientRect();
+            hero.style.setProperty('--sx', (e.clientX - r.left) + 'px');
+            hero.style.setProperty('--sy', (e.clientY - r.top) + 'px');
+        });
+
+        // Work cards: 3D tilt + spotlight
+        document.querySelectorAll('.work-card').forEach(card => {
+            card.addEventListener('mousemove', (e) => {
+                const r = card.getBoundingClientRect();
+                const x = (e.clientX - r.left) / r.width;
+                const y = (e.clientY - r.top)  / r.height;
+                card.style.setProperty('--ry', ((x - 0.5) *  16) + 'deg');
+                card.style.setProperty('--rx', ((y - 0.5) * -16) + 'deg');
+                card.style.setProperty('--gx', (x * 100) + '%');
+                card.style.setProperty('--gy', (y * 100) + '%');
+            });
+            card.addEventListener('mouseleave', () => {
+                card.style.setProperty('--rx', '0deg');
+                card.style.setProperty('--ry', '0deg');
+            });
+        });
+
+        // Magnetic buttons
+        document.querySelectorAll('.btn-primary, .btn-secondary').forEach(btn => {
+            btn.addEventListener('mousemove', (e) => {
+                const r = btn.getBoundingClientRect();
+                btn.style.setProperty('--mx', ((e.clientX - (r.left + r.width  / 2)) * 0.4) + 'px');
+                btn.style.setProperty('--my', ((e.clientY - (r.top  + r.height / 2)) * 0.5) + 'px');
+            });
+            btn.addEventListener('mouseleave', () => {
+                btn.style.setProperty('--mx', '0px');
+                btn.style.setProperty('--my', '0px');
+            });
+        });
+    }
+
 
     // ── Video Lightbox ──
     const lightbox      = document.getElementById('videoLightbox');
