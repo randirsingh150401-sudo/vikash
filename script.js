@@ -122,6 +122,138 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // ── Unique motion: dot field + springy headline + RGB split ──
+    if (canHover && !reduceMotion) {
+        const hero  = document.querySelector('.hero');
+        const h1    = hero.querySelector('h1');
+        const lerp  = (a, b, t) => a + (b - a) * t;
+
+        // Pointer (viewport coords) + speed
+        let mx = -9999, my = -9999, lastX = 0, lastY = 0, speed = 0, split = 0;
+        window.addEventListener('mousemove', (e) => {
+            mx = e.clientX; my = e.clientY;
+            speed = Math.min(Math.hypot(e.clientX - lastX, e.clientY - lastY), 80);
+            lastX = e.clientX; lastY = e.clientY;
+        });
+
+        // 1) Split headline into letters that behave like springs
+        const text = h1.textContent;
+        h1.setAttribute('aria-label', text);
+        h1.textContent = '';
+        const chars = [];
+        text.split('').forEach(ch => {
+            if (ch === ' ') { h1.appendChild(document.createTextNode(' ')); return; }
+            const s = document.createElement('span');
+            s.className = 'char';
+            s.textContent = ch;
+            s.setAttribute('aria-hidden', 'true');
+            h1.appendChild(s);
+            chars.push({ el: s, ox: 0, oy: 0, vx: 0, vy: 0, h: 0 });
+        });
+
+        // 2) Dot-grid canvas in hero
+        const canvas = document.createElement('canvas');
+        canvas.className = 'hero-dots';
+        hero.appendChild(canvas);
+        const ctx = canvas.getContext('2d');
+        const GAP = 34, RADIUS = 170;
+        let dots = [], W = 0, H = 0, dpr = 1, ripples = [], heroVisible = true;
+
+        function buildGrid() {
+            dpr = Math.min(window.devicePixelRatio || 1, 2);
+            const r = hero.getBoundingClientRect();
+            W = r.width; H = r.height;
+            canvas.width = W * dpr; canvas.height = H * dpr;
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            dots = [];
+            for (let y = GAP / 2; y < H; y += GAP)
+                for (let x = GAP / 2; x < W; x += GAP)
+                    dots.push({ x, y, ox: 0, oy: 0, vx: 0, vy: 0 });
+        }
+        buildGrid();
+        window.addEventListener('resize', buildGrid);
+        new IntersectionObserver(([en]) => { heroVisible = en.isIntersecting; }).observe(hero);
+
+        hero.addEventListener('mousedown', (e) => {
+            if (e.target.closest('a, button')) return;
+            const r = hero.getBoundingClientRect();
+            ripples.push({ x: e.clientX - r.left, y: e.clientY - r.top, t: 0 });
+        });
+
+        function frame() {
+            requestAnimationFrame(frame);
+            if (!heroVisible) return;
+
+            const r = hero.getBoundingClientRect();
+            const lx = mx - r.left, ly = my - r.top;
+
+            // --- dots ---
+            ctx.clearRect(0, 0, W, H);
+            ripples.forEach(rp => rp.t += 1);
+            ripples = ripples.filter(rp => rp.t < 70);
+
+            for (const d of dots) {
+                let fx = 0, fy = 0, glow = 0;
+                const dx = d.x + d.ox - lx, dy = d.y + d.oy - ly;
+                const dist = Math.hypot(dx, dy);
+                if (dist < RADIUS) {
+                    const f = (1 - dist / RADIUS);
+                    fx += (dx / (dist || 1)) * f * 2.4;
+                    fy += (dy / (dist || 1)) * f * 2.4;
+                    glow = f;
+                }
+                for (const rp of ripples) {
+                    const rdx = d.x - rp.x, rdy = d.y - rp.y;
+                    const rd = Math.hypot(rdx, rdy);
+                    const band = Math.abs(rd - rp.t * 12);
+                    if (band < 50) {
+                        const f = (1 - band / 50) * (1 - rp.t / 70) * 5;
+                        fx += (rdx / (rd || 1)) * f; fy += (rdy / (rd || 1)) * f;
+                        glow = Math.max(glow, (1 - band / 50) * (1 - rp.t / 70));
+                    }
+                }
+                d.vx = (d.vx + fx - d.ox * 0.06) * 0.86;
+                d.vy = (d.vy + fy - d.oy * 0.06) * 0.86;
+                d.ox += d.vx; d.oy += d.vy;
+
+                const rad = 1.1 + glow * 3.2;
+                ctx.beginPath();
+                ctx.arc(d.x + d.ox, d.y + d.oy, rad, 0, 6.2832);
+                ctx.fillStyle = glow > 0.02
+                    ? `rgba(${Math.round(144 - glow * 111)}, ${Math.round(196 - glow * 46)}, 243, ${0.22 + glow * 0.78})`
+                    : 'rgba(144, 196, 237, 0.2)';
+                ctx.fill();
+            }
+
+            // --- headline letters ---
+            for (const c of chars) {
+                const b = c.el.getBoundingClientRect();
+                const cx = b.left + b.width / 2 - c.ox, cy = b.top + b.height / 2 - c.oy;
+                const dx = cx - mx, dy = cy - my, dist = Math.hypot(dx, dy);
+                let fx = 0, fy = 0, target = 0;
+                if (dist < 150) {
+                    const f = 1 - dist / 150;
+                    fx = (dx / (dist || 1)) * f * 3.2;
+                    fy = (dy / (dist || 1)) * f * 3.2;
+                    target = f;
+                }
+                c.vx = (c.vx + fx - c.ox * 0.08) * 0.84;
+                c.vy = (c.vy + fy - c.oy * 0.08) * 0.84;
+                c.ox += c.vx; c.oy += c.vy;
+                c.h = lerp(c.h, target, 0.15);
+                const rot = c.ox * 0.4;
+                c.el.style.transform = `translate(${c.ox}px, ${c.oy}px) rotate(${rot}deg) scale(${1 + c.h * 0.18})`;
+                const k = c.h;
+                c.el.style.color = `rgb(${Math.round(255 - k * 222)}, ${Math.round(255 - k * 105)}, 255)`;
+            }
+
+            // --- RGB split from mouse speed ---
+            split = lerp(split, speed * 0.12, 0.2);
+            speed *= 0.9;
+            h1.style.setProperty('--split', split.toFixed(2) + 'px');
+        }
+        frame();
+    }
 
     // ── Video Lightbox ──
     const lightbox      = document.getElementById('videoLightbox');
