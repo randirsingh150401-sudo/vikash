@@ -261,23 +261,58 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!userPaused && heroVideo.paused) heroVideo.play().catch(() => {});
         };
 
-        // Sound toggle (autoplay must start muted; one click turns audio on)
+        // ── Sound: try to play with audio; browsers may block that until the
+        //    visitor interacts, so fall back to muted and unmute on first gesture.
         const soundBtn  = document.getElementById('heroSoundBtn');
         const soundText = soundBtn.querySelector('.hero-sound-text');
         const iconMuted = soundBtn.querySelector('.icon-muted');
         const iconSound = soundBtn.querySelector('.icon-sound');
+        let userMuted = false;       // visitor explicitly turned sound off
+        let justUnmuted = false;     // first gesture only unmutes, doesn't pause
+
+        function syncSoundUI() {
+            const m = heroVideo.muted;
+            iconMuted.style.display = m ? 'block' : 'none';
+            iconSound.style.display = m ? 'none'  : 'block';
+            soundText.textContent   = m ? 'Sound on' : 'Sound off';
+            soundBtn.setAttribute('aria-label', m ? 'Turn sound on' : 'Turn sound off');
+        }
+
+        function setMuted(m) {
+            heroVideo.muted = m;
+            if (!m && heroVideo.volume === 0) heroVideo.volume = 1;
+            syncSoundUI();
+        }
+
         soundBtn.addEventListener('click', (e) => {
             e.stopPropagation();
-            heroVideo.muted = !heroVideo.muted;
-            if (!heroVideo.muted && heroVideo.volume === 0) heroVideo.volume = 1;
-            iconMuted.style.display = heroVideo.muted ? 'block' : 'none';
-            iconSound.style.display = heroVideo.muted ? 'none'  : 'block';
-            soundText.textContent   = heroVideo.muted ? 'Sound on' : 'Sound off';
-            soundBtn.setAttribute('aria-label', heroVideo.muted ? 'Turn sound on' : 'Turn sound off');
+            userMuted = !heroVideo.muted;
+            setMuted(userMuted);
             keepPlaying();
         });
 
+        // First user gesture anywhere on the page → turn sound on
+        const gestures = ['pointerdown', 'touchend', 'keydown', 'click'];
+        function unmuteOnGesture(e) {
+            if (userMuted || !heroVideo.muted) return;
+            if (e.target.closest && e.target.closest('#heroSoundBtn')) return;
+            setMuted(false);
+            if (e.target.closest && e.target.closest('.hero-video')) justUnmuted = true;
+            keepPlaying();
+            gestures.forEach(g => document.removeEventListener(g, unmuteOnGesture, true));
+        }
+
+        // Try with sound straight away (works if the browser allows it)
+        heroVideo.muted = false;
+        heroVideo.play().then(syncSoundUI).catch(() => {
+            heroVideo.muted = true;
+            heroVideo.play().catch(() => {});
+            syncSoundUI();
+            gestures.forEach(g => document.addEventListener(g, unmuteOnGesture, true));
+        });
+
         heroBox.addEventListener('click', () => {
+            if (justUnmuted) return;     // that click only turned the sound on
             if (heroVideo.paused) {
                 userPaused = false;
                 heroVideo.play().catch(() => {});
@@ -289,6 +324,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const lb = cl && cl.querySelector('.cursor-label');
             if (lb) lb.textContent = heroVideo.paused ? 'Play' : 'Pause';
         });
+        document.addEventListener('click', () => { justUnmuted = false; });
 
         heroVideo.addEventListener('pause', () => {
             heroBox.classList.toggle('is-paused', userPaused);
@@ -300,7 +336,6 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('visibilitychange', () => { if (!document.hidden) keepPlaying(); });
         window.addEventListener('focus', keepPlaying);
         new IntersectionObserver(([en]) => { if (en.isIntersecting) keepPlaying(); }).observe(heroBox);
-        keepPlaying();
     }
 
     // ── Video Lightbox ──
