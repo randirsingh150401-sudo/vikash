@@ -122,18 +122,16 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ── Unique motion: dot field + springy headline + RGB split ──
+    // ── Unique motion: dot field + springy headline ──
     if (canHover && !reduceMotion) {
         const hero  = document.querySelector('.hero');
         const h1    = hero.querySelector('h1');
         const lerp  = (a, b, t) => a + (b - a) * t;
 
-        // Pointer (viewport coords) + speed
-        let mx = -9999, my = -9999, lastX = 0, lastY = 0, speed = 0, split = 0;
+        // Pointer (viewport coords)
+        let mx = -9999, my = -9999;
         window.addEventListener('mousemove', (e) => {
             mx = e.clientX; my = e.clientY;
-            speed = Math.min(Math.hypot(e.clientX - lastX, e.clientY - lastY), 80);
-            lastX = e.clientX; lastY = e.clientY;
         });
 
         // 1) Split headline into letters that behave like springs
@@ -246,11 +244,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const k = c.h;
                 c.el.style.color = `rgb(${Math.round(255 - k * 222)}, ${Math.round(255 - k * 105)}, 255)`;
             }
-
-            // --- RGB split from mouse speed ---
-            split = lerp(split, speed * 0.12, 0.2);
-            speed *= 0.9;
-            h1.style.setProperty('--split', split.toFixed(2) + 'px');
         }
         frame();
     }

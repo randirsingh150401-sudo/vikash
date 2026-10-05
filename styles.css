@@ -705,7 +705,7 @@ footer {
     .cursor-ring.is-down { border-color: #fff; }
 }
 
-/* ── Unique motion: dot field, springy letters, RGB split ── */
+/* ── Unique motion: dot field, springy letters ── */
 .hero-dots {
     position: absolute;
     inset: 0;
@@ -713,12 +713,6 @@ footer {
     height: 100%;
     z-index: 1;
     pointer-events: none;
-}
-
-.hero h1 {
-    text-shadow:
-        calc(var(--split, 0px) * -1) 0 rgba(255, 40, 90, 0.8),
-        var(--split, 0px) 0 rgba(0, 200, 255, 0.8);
 }
 
 .hero h1 .char {
