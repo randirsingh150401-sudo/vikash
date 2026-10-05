@@ -61,7 +61,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Ring state: link / media
         const linkSel = 'a, button, .close-modal';
         document.addEventListener('mouseover', (e) => {
-            const onCard = e.target.closest('.work-card');
+            const onCard = e.target.closest('.work-card, .hero-video');
             const onLink = e.target.closest(linkSel);
             ring.classList.toggle('is-media', !!onCard && !onLink);
             ring.classList.toggle('is-link',  !!onLink);
@@ -173,7 +173,7 @@ document.addEventListener('DOMContentLoaded', () => {
         new IntersectionObserver(([en]) => { heroVisible = en.isIntersecting; }).observe(hero);
 
         hero.addEventListener('mousedown', (e) => {
-            if (e.target.closest('a, button')) return;
+            if (e.target.closest('a, button, .hero-video')) return;
             const r = hero.getBoundingClientRect();
             ripples.push({ x: e.clientX - r.left, y: e.clientY - r.top, t: 0 });
         });
@@ -312,7 +312,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Open lightbox on card click
-    document.querySelectorAll('.work-card').forEach(card => {
+    document.querySelectorAll('.work-card, .hero-video').forEach(card => {
         card.addEventListener('click', () => {
             openLightbox(card.querySelector('video').src);
         });
