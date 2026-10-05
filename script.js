@@ -261,6 +261,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!userPaused && heroVideo.paused) heroVideo.play().catch(() => {});
         };
 
+        // Sound toggle (autoplay must start muted; one click turns audio on)
+        const soundBtn  = document.getElementById('heroSoundBtn');
+        const soundText = soundBtn.querySelector('.hero-sound-text');
+        const iconMuted = soundBtn.querySelector('.icon-muted');
+        const iconSound = soundBtn.querySelector('.icon-sound');
+        soundBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            heroVideo.muted = !heroVideo.muted;
+            if (!heroVideo.muted && heroVideo.volume === 0) heroVideo.volume = 1;
+            iconMuted.style.display = heroVideo.muted ? 'block' : 'none';
+            iconSound.style.display = heroVideo.muted ? 'none'  : 'block';
+            soundText.textContent   = heroVideo.muted ? 'Sound on' : 'Sound off';
+            soundBtn.setAttribute('aria-label', heroVideo.muted ? 'Turn sound on' : 'Turn sound off');
+            keepPlaying();
+        });
+
         heroBox.addEventListener('click', () => {
             if (heroVideo.paused) {
                 userPaused = false;
