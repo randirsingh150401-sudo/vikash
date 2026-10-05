@@ -785,16 +785,13 @@ footer {
     z-index: 3;
     display: flex;
     align-items: center;
-    gap: 0.45rem;
-    padding: 0.5rem 0.9rem;
+    justify-content: center;
+    width: 40px; height: 40px;
+    padding: 0;
     background: rgba(0, 0, 0, 0.6);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 50px;
-    color: #fff;
-    font-size: 0.8rem;
-    font-weight: 600;
-    letter-spacing: 0;
+    border-radius: 50%;
     cursor: pointer;
     transition: background 0.25s, border-color 0.25s;
 }

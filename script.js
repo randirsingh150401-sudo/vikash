@@ -264,7 +264,6 @@ document.addEventListener('DOMContentLoaded', () => {
         // ── Sound: try to play with audio; browsers may block that until the
         //    visitor interacts, so fall back to muted and unmute on first gesture.
         const soundBtn  = document.getElementById('heroSoundBtn');
-        const soundText = soundBtn.querySelector('.hero-sound-text');
         const iconMuted = soundBtn.querySelector('.icon-muted');
         const iconSound = soundBtn.querySelector('.icon-sound');
         let userMuted = false;       // visitor explicitly turned sound off
@@ -274,7 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const m = heroVideo.muted;
             iconMuted.style.display = m ? 'block' : 'none';
             iconSound.style.display = m ? 'none'  : 'block';
-            soundText.textContent   = m ? 'Sound on' : 'Sound off';
             soundBtn.setAttribute('aria-label', m ? 'Turn sound on' : 'Turn sound off');
         }
 
