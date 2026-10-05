@@ -63,6 +63,9 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('mouseover', (e) => {
             const onCard = e.target.closest('.work-card, .hero-video');
             const onLink = e.target.closest(linkSel);
+            const hv = e.target.closest('.hero-video');
+            if (hv) label.textContent = hv.querySelector('video').paused ? 'Play' : 'Pause';
+            else if (onCard) label.textContent = 'Play';
             ring.classList.toggle('is-media', !!onCard && !onLink);
             ring.classList.toggle('is-link',  !!onLink);
         });
@@ -248,6 +251,42 @@ document.addEventListener('DOMContentLoaded', () => {
         frame();
     }
 
+    // ── Hero video: always playing until the visitor pauses it ──
+    const heroBox   = document.querySelector('.hero-video');
+    const heroVideo = heroBox && heroBox.querySelector('video');
+    if (heroVideo) {
+        let userPaused = false;
+
+        const keepPlaying = () => {
+            if (!userPaused && heroVideo.paused) heroVideo.play().catch(() => {});
+        };
+
+        heroBox.addEventListener('click', () => {
+            if (heroVideo.paused) {
+                userPaused = false;
+                heroVideo.play().catch(() => {});
+            } else {
+                userPaused = true;
+                heroVideo.pause();
+            }
+            const cl = document.getElementById('cursorRing');
+            const lb = cl && cl.querySelector('.cursor-label');
+            if (lb) lb.textContent = heroVideo.paused ? 'Play' : 'Pause';
+        });
+
+        heroVideo.addEventListener('pause', () => {
+            heroBox.classList.toggle('is-paused', userPaused);
+            // browser paused it (tab switch, power saving…) — bring it back
+            setTimeout(keepPlaying, 150);
+        });
+        heroVideo.addEventListener('play', () => heroBox.classList.remove('is-paused'));
+        heroVideo.addEventListener('ended', keepPlaying);
+        document.addEventListener('visibilitychange', () => { if (!document.hidden) keepPlaying(); });
+        window.addEventListener('focus', keepPlaying);
+        new IntersectionObserver(([en]) => { if (en.isIntersecting) keepPlaying(); }).observe(heroBox);
+        keepPlaying();
+    }
+
     // ── Video Lightbox ──
     const lightbox      = document.getElementById('videoLightbox');
     const lbVideo       = document.getElementById('lightboxVideo');
@@ -312,7 +351,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Open lightbox on card click
-    document.querySelectorAll('.work-card, .hero-video').forEach(card => {
+    document.querySelectorAll('.work-card').forEach(card => {
         card.addEventListener('click', () => {
             openLightbox(card.querySelector('video').src);
         });
