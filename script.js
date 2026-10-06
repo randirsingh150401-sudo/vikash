@@ -17,6 +17,66 @@ document.addEventListener('DOMContentLoaded', () => {
     updateClock();
     setInterval(updateClock, 1000);
 
+    // ── Scroll motion: reveal on scroll, progress bar, smart navbar, video parallax ──
+    const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (!prefersReduced) {
+        // Reveal elements as they enter the viewport
+        const revealGroups = [
+            ['.work-section h2', 0],
+            ['.work-card', 0.12],
+            ['.contact-container h2', 0],
+            ['.contact-container p', 0.1],
+            ['#cal-embed', 0.2],
+            ['footer p', 0]
+        ];
+        const io = new IntersectionObserver((entries) => {
+            entries.forEach(en => {
+                if (!en.isIntersecting) return;
+                const el = en.target;
+                el.classList.add('in');
+                io.unobserve(el);
+                // hand control back to normal hover transitions once revealed
+                setTimeout(() => el.classList.remove('reveal', 'in'), 1600);
+            });
+        }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
+
+        revealGroups.forEach(([sel, step]) => {
+            document.querySelectorAll(sel).forEach((el, i) => {
+                el.classList.add('reveal');
+                el.style.setProperty('--d', ((i % 3) * step) + 's');
+                io.observe(el);
+            });
+        });
+
+        // Scroll progress bar
+        const bar = document.createElement('div');
+        bar.className = 'scroll-progress';
+        document.body.appendChild(bar);
+
+        const nav = document.querySelector('.navbar');
+        const heroBoxEl = document.querySelector('.hero-video');
+        let lastY = window.scrollY, ticking = false;
+
+        function onScroll() {
+            const y = window.scrollY;
+            const max = document.documentElement.scrollHeight - innerHeight;
+            bar.style.transform = `scaleX(${max > 0 ? y / max : 0})`;
+
+            // hide navbar on scroll down, show on scroll up
+            if (y > 140 && y > lastY + 4)      nav.classList.add('nav-hidden');
+            else if (y < lastY - 4 || y < 140) nav.classList.remove('nav-hidden');
+            lastY = y;
+
+            // hero video drifts slower than the page
+            if (heroBoxEl && y < innerHeight * 1.2) heroBoxEl.style.translate = `0 ${y * 0.1}px`;
+            ticking = false;
+        }
+        window.addEventListener('scroll', () => {
+            if (!ticking) { requestAnimationFrame(onScroll); ticking = true; }
+        }, { passive: true });
+        onScroll();
+    }
+
     // ── Mouse motion ──
     const canHover = window.matchMedia('(hover: hover) and (pointer: fine)').matches;
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -142,14 +202,21 @@ document.addEventListener('DOMContentLoaded', () => {
         h1.setAttribute('aria-label', text);
         h1.textContent = '';
         const chars = [];
-        text.split('').forEach(ch => {
-            if (ch === ' ') { h1.appendChild(document.createTextNode(' ')); return; }
-            const s = document.createElement('span');
-            s.className = 'char';
-            s.textContent = ch;
-            s.setAttribute('aria-hidden', 'true');
-            h1.appendChild(s);
-            chars.push({ el: s, ox: 0, oy: 0, vx: 0, vy: 0, h: 0 });
+        let ci = 0;
+        text.split(' ').forEach((word, wi, arr) => {
+            const w = document.createElement('span');
+            w.className = 'word';
+            w.setAttribute('aria-hidden', 'true');
+            word.split('').forEach(ch => {
+                const s = document.createElement('span');
+                s.className = 'char';
+                s.style.setProperty('--i', ci++);
+                s.textContent = ch;
+                w.appendChild(s);
+                chars.push({ el: s, ox: 0, oy: 0, vx: 0, vy: 0, h: 0 });
+            });
+            h1.appendChild(w);
+            if (wi < arr.length - 1) h1.appendChild(document.createTextNode(' '));
         });
 
         // 2) Dot-grid canvas in hero
