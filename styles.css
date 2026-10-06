@@ -159,8 +159,8 @@ h2 {
     position: relative;
     background:
         radial-gradient(ellipse 70% 60% at 50% 60%, rgba(26, 58, 140, 0.35) 0%, transparent 70%),
-        radial-gradient(ellipse 40% 40% at 80% 20%, rgba(33, 150, 243, 0.12) 0%, transparent 60%),
-        var(--black);
+        radial-gradient(ellipse 40% 40% at 80% 20%, rgba(33, 150, 243, 0.12) 0%, transparent 60%);
+    z-index: 1;
     overflow: hidden;
     text-align: center;
 }
@@ -210,7 +210,7 @@ h2 {
 .hero h1 {
     font-size: 4.4rem;
     font-weight: 800;
-    margin-bottom: 1.2rem;
+    margin-bottom: 2.2rem;
     color: var(--white);
     line-height: 1.05;
     letter-spacing: -0.035em;
@@ -280,7 +280,8 @@ h2 {
 /* ── Work Section ── */
 .work-section {
     padding: 5.5rem 5%;
-    background: var(--near-black);
+    position: relative;
+    z-index: 1;
 }
 
 .work-section h2 { color: var(--white); }
@@ -351,7 +352,9 @@ h2 {
 /* ── Book a Call / Cal.com ── */
 .contact-section {
     padding: 5.5rem 5%;
-    background: var(--card-bg);
+    position: relative;
+    z-index: 1;
+    background: rgba(13, 21, 37, 0.35);
     border-top: 1px solid rgba(33, 150, 243, 0.1);
     border-bottom: 1px solid rgba(33, 150, 243, 0.1);
 }
@@ -380,7 +383,8 @@ h2 {
 footer {
     text-align: center;
     padding: 2rem;
-    background: var(--black);
+    position: relative;
+    z-index: 1;
     color: var(--text-dim);
     font-size: 0.85rem;
     letter-spacing: -0.01em;
@@ -707,12 +711,12 @@ footer {
 }
 
 /* ── Unique motion: dot field, springy letters ── */
-.hero-dots {
-    position: absolute;
+.page-dots {
+    position: fixed;
     inset: 0;
     width: 100%;
     height: 100%;
-    z-index: 1;
+    z-index: 0;
     pointer-events: none;
 }
 

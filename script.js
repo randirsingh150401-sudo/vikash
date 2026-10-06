@@ -88,7 +88,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const label    = ring.querySelector('.cursor-label');
         const hero     = document.querySelector('.hero');
         const shapes   = document.querySelectorAll('.shape');
-        const heroContent = document.querySelector('.hero-content');
         const lerp     = (a, b, t) => a + (b - a) * t;
 
         // Smoothed pointer state
@@ -142,8 +141,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const depth = (i + 1) * 55;
                 s.style.translate = `${-px * depth}px ${-py * depth}px`;
             });
-            // hero text floats slightly with the mouse
-            heroContent.style.transform = `translate(${px * 14}px, ${py * 10}px)`;
             requestAnimationFrame(frame);
         })();
 
@@ -219,50 +216,58 @@ document.addEventListener('DOMContentLoaded', () => {
             if (wi < arr.length - 1) h1.appendChild(document.createTextNode(' '));
         });
 
-        // 2) Dot-grid canvas in hero
+        // 2) Dot-grid canvas — fixed behind the whole page
         const canvas = document.createElement('canvas');
-        canvas.className = 'hero-dots';
-        hero.appendChild(canvas);
+        canvas.className = 'page-dots';
+        document.body.prepend(canvas);
         const ctx = canvas.getContext('2d');
         const GAP = 34, RADIUS = 170;
-        let dots = [], W = 0, H = 0, dpr = 1, ripples = [], heroVisible = true;
+        let dots = [], W = 0, H = 0, dpr = 1, ripples = [];
 
         function buildGrid() {
             dpr = Math.min(window.devicePixelRatio || 1, 2);
-            const r = hero.getBoundingClientRect();
-            W = r.width; H = r.height;
+            W = window.innerWidth; H = window.innerHeight;
             canvas.width = W * dpr; canvas.height = H * dpr;
             ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
             dots = [];
-            for (let y = GAP / 2; y < H; y += GAP)
-                for (let x = GAP / 2; x < W; x += GAP)
+            for (let y = GAP / 2; y < H + GAP; y += GAP)
+                for (let x = GAP / 2; x < W + GAP; x += GAP)
                     dots.push({ x, y, ox: 0, oy: 0, vx: 0, vy: 0 });
         }
         buildGrid();
         window.addEventListener('resize', buildGrid);
-        new IntersectionObserver(([en]) => { heroVisible = en.isIntersecting; }).observe(hero);
 
-        hero.addEventListener('mousedown', (e) => {
-            if (e.target.closest('a, button, .hero-video')) return;
-            const r = hero.getBoundingClientRect();
-            ripples.push({ x: e.clientX - r.left, y: e.clientY - r.top, t: 0 });
+        // click ripple anywhere that isn't interactive
+        document.addEventListener('mousedown', (e) => {
+            if (e.target.closest('a, button, .hero-video, .work-card, #cal-embed, .video-lightbox, .modal')) return;
+            ripples.push({ x: e.clientX, y: e.clientY, t: 0 });
         });
 
         function frame() {
             requestAnimationFrame(frame);
-            if (!heroVisible) return;
 
-            const r = hero.getBoundingClientRect();
-            const lx = mx - r.left, ly = my - r.top;
+            // grid drifts upward as the page scrolls
+            const shift = (window.scrollY * 0.3) % GAP;
+            const lx = mx, ly = my;
 
-            // --- dots ---
             ctx.clearRect(0, 0, W, H);
+
+            // soft blue glow that follows the mouse across the whole page
+            if (mx > -9000) {
+                const g = ctx.createRadialGradient(lx, ly, 0, lx, ly, 380);
+                g.addColorStop(0, 'rgba(33, 150, 243, 0.16)');
+                g.addColorStop(1, 'rgba(33, 150, 243, 0)');
+                ctx.fillStyle = g;
+                ctx.fillRect(lx - 380, ly - 380, 760, 760);
+            }
+
             ripples.forEach(rp => rp.t += 1);
             ripples = ripples.filter(rp => rp.t < 70);
 
             for (const d of dots) {
+                const bx = d.x, by = d.y - shift;
                 let fx = 0, fy = 0, glow = 0;
-                const dx = d.x + d.ox - lx, dy = d.y + d.oy - ly;
+                const dx = bx + d.ox - lx, dy = by + d.oy - ly;
                 const dist = Math.hypot(dx, dy);
                 if (dist < RADIUS) {
                     const f = (1 - dist / RADIUS);
@@ -271,7 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     glow = f;
                 }
                 for (const rp of ripples) {
-                    const rdx = d.x - rp.x, rdy = d.y - rp.y;
+                    const rdx = bx - rp.x, rdy = by - rp.y;
                     const rd = Math.hypot(rdx, rdy);
                     const band = Math.abs(rd - rp.t * 12);
                     if (band < 50) {
@@ -286,7 +291,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 const rad = 1.1 + glow * 3.2;
                 ctx.beginPath();
-                ctx.arc(d.x + d.ox, d.y + d.oy, rad, 0, 6.2832);
+                ctx.arc(bx + d.ox, by + d.oy, rad, 0, 6.2832);
                 ctx.fillStyle = glow > 0.02
                     ? `rgba(${Math.round(144 - glow * 111)}, ${Math.round(196 - glow * 46)}, 243, ${0.22 + glow * 0.78})`
                     : 'rgba(144, 196, 237, 0.2)';
