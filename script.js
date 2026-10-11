@@ -26,8 +26,7 @@ document.addEventListener('DOMContentLoaded', () => {
             ['.work-card', 0.12],
             ['.contact-container h2', 0],
             ['.contact-container p', 0.1],
-            ['#cal-embed', 0.2],
-            ['footer p', 0]
+            ['#cal-embed', 0.2]
         ];
         const io = new IntersectionObserver((entries) => {
             entries.forEach(en => {
@@ -38,7 +37,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 // hand control back to normal hover transitions once revealed
                 setTimeout(() => el.classList.remove('reveal', 'in'), 1600);
             });
-        }, { threshold: 0.15, rootMargin: '0px 0px -6% 0px' });
+        }, { threshold: 0.1 });
 
         revealGroups.forEach(([sel, step]) => {
             document.querySelectorAll(sel).forEach((el, i) => {
@@ -47,6 +46,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 io.observe(el);
             });
         });
+
+        // Safety net: anything on screen that the observer missed (e.g. page
+        // height changing while the Cal.com embed loads) gets revealed anyway
+        setInterval(() => {
+            document.querySelectorAll('.reveal:not(.in)').forEach(el => {
+                const r = el.getBoundingClientRect();
+                if (r.top < innerHeight && r.bottom > 0) {
+                    el.classList.add('in');
+                    io.unobserve(el);
+                    setTimeout(() => el.classList.remove('reveal', 'in'), 1600);
+                }
+            });
+        }, 800);
 
         // Scroll progress bar
         const bar = document.createElement('div');
