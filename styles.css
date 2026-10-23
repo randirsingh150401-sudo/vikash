@@ -98,7 +98,7 @@ h2 {
 /* ── Navbar ── */
 .navbar {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     padding: 1.2rem 5%;
     position: fixed;
@@ -155,7 +155,7 @@ h2 {
     display: flex;
     align-items: flex-start;
     justify-content: center;
-    padding: 0 5%;
+    padding: 0 3%;
     position: relative;
     background:
         radial-gradient(ellipse 70% 60% at 50% 60%, rgba(26, 58, 140, 0.35) 0%, transparent 70%),
@@ -169,7 +169,7 @@ h2 {
     z-index: 2;
     will-change: transform;
     padding: 10.5rem 0 5rem;
-    max-width: 1280px;
+    max-width: 1500px;
     width: 100%;
     display: flex;
     flex-direction: column;
@@ -289,7 +289,7 @@ h2 {
 .work-grid {
     display: grid;
     grid-template-columns: repeat(3, minmax(0, 1fr));
-    gap: 1.8rem;
+    gap: 3rem;
     max-width: 1300px;
     margin: 0 auto;
 }
@@ -737,7 +737,7 @@ footer {
 /* ── Hero video ── */
 .hero-video {
     position: relative;
-    width: min(1200px, 100%);
+    width: min(1400px, 100%);
     margin-top: 2.8rem;
     border-radius: 18px;
     overflow: hidden;
