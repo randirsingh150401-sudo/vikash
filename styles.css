@@ -878,3 +878,25 @@ footer {
     border-color: var(--blue-mid);
 }
 .footer-email { margin-top: 0.5rem; }
+
+/* ── Social links ── */
+.socials {
+    display: flex;
+    justify-content: center;
+    gap: 0.8rem;
+    margin-bottom: 1.2rem;
+}
+.socials a {
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    color: var(--white);
+    border: 1px solid rgba(144, 196, 237, 0.35);
+    transition: background 0.3s, border-color 0.3s, transform 0.25s cubic-bezier(0.22, 1, 0.36, 1), box-shadow 0.3s;
+}
+.socials a:hover {
+    background: var(--blue-mid);
+    border-color: var(--blue-mid);
+    transform: translateY(-4px);
+    box-shadow: 0 10px 24px rgba(33, 150, 243, 0.4);
+}
